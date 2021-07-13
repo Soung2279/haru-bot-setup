@@ -1,7 +1,7 @@
 Haru-Bot-Setup
-
-原项目地址：[haru-bot-setup](https://github.com/Soung2279/haru-bot-setup/)
 ===========================
+#### 原项目地址：[haru-bot-setup](https://github.com/Soung2279/haru-bot-setup/)
+
 HoshinoBot-Harubot是基于[Go-cqhttp](https://github.com/Mrs4s/go-cqhttp)，[HoshinoBot](https://github.com/Ice-Cirno/HoshinoBot)的**娱乐型QQ机器人**
 
 ~~因本人已从 pcr AFK，且日常使用会战功能频率不高~~。故本bot**未搭载**任何会战相关的功能。但本bot仍可与[yobot](http://yobot.win/)兼容。
@@ -471,7 +471,10 @@ bot最终输出的地方可以简单通过查找`bot.send`,`bot.finish`等查看
 harubot的孪生bot：
 [早坂爱bot](http://wpa.qq.com/msgrd?v=3&uin=2143512954&site=qq&menu=yes)，[惠惠bot](http://wpa.qq.com/msgrd?v=3&uin=3403478643&site=qq&menu=yes)，[贝拉bot](http://wpa.qq.com/msgrd?v=3&uin=3207117254&site=qq&menu=yes)
 ~~均已停用~~
-made by Soung2279
+
+~~harubot目前正在招收试用人群，可在q群1121815503向群主申请免费试用。~~
+
+**made by Soung2279**
 
 ---
 ### Q&A
