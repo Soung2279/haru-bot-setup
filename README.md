@@ -1,4 +1,6 @@
 Haru-Bot-Setup
+
+原项目地址：[haru-bot-setup](https://github.com/Soung2279/haru-bot-setup/)
 ===========================
 HoshinoBot-Harubot是基于[Go-cqhttp](https://github.com/Mrs4s/go-cqhttp)，[HoshinoBot](https://github.com/Ice-Cirno/HoshinoBot)的**娱乐型QQ机器人**
 
@@ -88,7 +90,7 @@ HoshinoBot-Harubot是基于[Go-cqhttp](https://github.com/Mrs4s/go-cqhttp)，[Ho
     git clone https://github.com/Soung2279/Haru-Bot-Setup.git
     ```
 
-    或者直接下载本分支文件[Haru-Bot-Setup-master.zip](https://github.com/Soung2279/Haru-Bot-Setup/archive/refs/heads/master.zip)
+    或者直接下载本分支文件[Haru-Bot-Setup-master.zip](https://github.com/Soung2279/haru-bot-setup/archive/refs/heads/master.zip)
 
 
 3. 在合适的文件目录（推荐C盘根目录）新建文件夹并重命名为`Resources`  
