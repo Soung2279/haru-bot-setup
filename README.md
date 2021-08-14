@@ -2,6 +2,15 @@ Haru-Bot-Setup
 ===========================
 #### 原项目地址：[haru-bot-setup](https://github.com/Soung2279/haru-bot-setup/)
 
+#### 更新日志
+
+##### 2021/8/15  v2.0
+
+更新musedashwiki
+计划更新：全局自定义回复语，更生动 ~~moe~~ 的语言库
+
+****
+
 HoshinoBot-Harubot是基于[Go-cqhttp](https://github.com/Mrs4s/go-cqhttp)，[HoshinoBot](https://github.com/Ice-Cirno/HoshinoBot)的**娱乐型QQ机器人**
 
 ~~因本人已从 pcr AFK，且日常使用会战功能频率不高~~。故本bot**未搭载**任何会战相关的功能。但本bot仍可与[yobot](http://yobot.win/)兼容。
