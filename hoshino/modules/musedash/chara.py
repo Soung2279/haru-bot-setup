@@ -21,18 +21,22 @@ class Roster:
         self._roster = pygtrie.CharTrie()
         self.update()
     
+
     def update(self):
         importlib.reload(_song_data)
         self._roster.clear()
-        for idx, names in _song_data.SONG_DATA.items():
-            for n in names:
-                n = util.normalize_str(n)
-                if n not in self._roster:
-                    self._roster[n] = idx
-                else:
-                    pass
-        self._all_name_list = self._roster.keys()
+        for idx, values in _song_data.SONG_DATA.items():
+            sname = values[0]  #下标0是字典的歌曲原名
+            #hname = values[8]  #下标8是字典的查询名
+            n = util.normalize_str(sname)
+  
+            if n not in self._roster:
+                self._roster[n] = idx
+            else:
+                logger.warning(f'MuseDash:chara: 出现重名{n}于id{idx}与id{self._roster[n]}')
+                pass
 
+        self._all_name_list = self._roster.keys()
 
     def get_id(self, name):
         name = util.normalize_str(name)
@@ -40,7 +44,8 @@ class Roster:
 
 
     def guess_id(self, name):
-        name, score = process.extractOne(name, self._all_name_list, processor=util.normalize_str)
+        """@return: id, name, score"""
+        name, score = process.extractOne(name, self._all_name_list)#, #processor=util.normalize_str)
         return self._roster[name], name, score
 
 

@@ -1,35 +1,52 @@
-import requests, asyncio, os, random
+# -*- coding: utf-8 -*-
+from time import time
+import requests, asyncio, os, random, time
 from asyncio import events
 from nonebot.exceptions import CQHttpError
-import time
+from datetime import datetime
+import pytz
 import hoshino
 from hoshino import Service, priv, aiorequests, R
 from hoshino.typing import CQEvent, MessageSegment
-
-from hoshino.typing import CQEvent
 from hoshino.util import FreqLimiter, DailyNumberLimiter
+from . import _song_data
 
-from . import chara
+tz = pytz.timezone('Asia/Shanghai')
 
 _max = 1
 _nlmt = DailyNumberLimiter(_max)
 
-forward_msg_name = 'SoungBot测试版'
-forward_msg_uid = '756160433'
+forward_msg_name = 'SoungBot测试版'  #全图查询时，转发消息使用的呢称
+forward_msg_uid = '756160433'  #全图查询时，转发消息使用的画像
 
-_cd = 300  #调用间隔冷却时间(s)  为避免被风控，建议调高
+_cd = 300  #全图查询调用间隔冷却时间(s)  为避免被风控，建议调高
 _flmt = FreqLimiter(_cd)
 
 Wiki_Menu_Artwork_img = R.img(f"musewiki/etc/artwork.png").cqcode
 
-sv_help = '''
-※MuseDash百科-插图查询※
+tips_tuple = _song_data.Muse_Tips
 
-[查询插图]  进入插图查询菜单
-[单/全图查询]  不同模式的插图查询
-[动画查询]  查询游戏Live2D插画
-[查询游戏场景]  进入游戏场景查询菜单
-[纯/合成场景]  查看不同的场景图片
+sv_help = '''
+    ※MuseDash百科-插图查询※
+当前菜单有以下内容：
+    - 插图查询 -
+- [查询插图]  进入插图查询菜单
+- [单/全图查询]  不同模式的插图查询
+- [动画查询]  查询游戏Live2D插画
+- [随机插画/封面]  随机查看一张图片
+    - 场景查询 -
+- [查询游戏场景]  进入游戏场景查询菜单
+- [纯/合成场景]  查看不同的场景图片
+- [随机纯场景/合成场景]  随机查看一张图片
+
+或发送以下指令进入其它菜单：
+- [帮助百科资料查询]
+- [帮助md百科]
+- [帮助百科成就查询]
+- [帮助百科语音查询]
+- [帮助百科角色查询]
+- [帮助百科歌曲推送]
+- [帮助百科运势]
 '''.strip()
 
 sv = Service(
@@ -43,7 +60,7 @@ sv = Service(
     )
 
 def get_voice_artwork_menu():
-    filename = 'TroveBgm.wav'
+    filename = 'TroveBgm.wav'  #首次使用菜单时的BGM
     voice_rec = R.get('record/musewiki/audioclip/', filename)
     return voice_rec
 
@@ -52,35 +69,47 @@ async def bangzhu_musewiki_artwork(bot, ev) -> MessageSegment:
     file = get_voice_artwork_menu()
     voice_rec = MessageSegment.record(f'file:///{os.path.abspath(file.path)}')
     uid = ev['user_id']
+    now_hour=datetime.now(tz).hour
+    if 0<=now_hour<6:  #凌晨
+        tips = random.choice(tips_tuple)
+        greetings = '(｡･∀･)ﾉﾞ凌晨好！'
+        await bot.send(ev, greetings + tips)
+    elif 8<=now_hour<12:  #上午
+        tips = random.choice(tips_tuple)
+        greetings = '(((o(*ﾟ▽ﾟ*)o)))上午好！'
+        await bot.send(ev, greetings + tips)
+    elif 12<=now_hour<14:  #中午
+        tips = random.choice(tips_tuple)
+        greetings = '(o゜▽゜)o☆中午好！'
+        await bot.send(ev, greetings + tips)
+    elif 14<=now_hour<18:  #下午
+        tips = random.choice(tips_tuple)
+        greetings = 'o(^▽^)o下午好！'
+        await bot.send(ev, greetings + tips)
+    elif 18<=now_hour<21:  #晚上
+        tips = random.choice(tips_tuple)
+        greetings = '♪(´∇`*)晚上好！'
+        await bot.send(ev, greetings + tips)
+    elif 21<=now_hour<24:  #深夜
+        tips = random.choice(tips_tuple)
+        greetings = '✧(≖ ◡ ≖✿)深夜好！'
+        await bot.send(ev, greetings + tips)
     if not _nlmt.check(uid):
         await bot.send(ev, f"欢迎继续使用MuseDash百科-插图查询！")
     else:
         await bot.send(ev, voice_rec)
-    
     _nlmt.increase(uid)
+    
     final_output = Wiki_Menu_Artwork_img + sv_help
     await bot.send(ev, final_output)
 
-
 @sv.on_fullmatch(["查询插图", "插图查询"])
 async def wiki_artwork_notice(bot, ev):
-    await bot.send(ev, '请选择查询模式：单图查询/全图查询/动画查询')
-
-@sv.on_fullmatch("单图查询")
-async def wiki_artwork_menu(bot, ev):
-    await bot.send(ev, '请按游戏内顺序查询：1-57，例如：单图查询1', at_sender=True)
+    await bot.send(ev, '请选择查询模式：单图查询/全图查询/动画查询\n您也可以选择随机查看，指令【随机封面/插画】')
 
 @sv.on_fullmatch(["游戏场景查询", "muse场景查询", "查询游戏场景"])
 async def wiki_image_scenes_menu(bot, ev):
-    await bot.send(ev, f'请选择您要查询的场景。纯场景/合成场景。\n纯场景即不含游戏UI，场景对应敌人类型的图片，合成反之。\n例如：发送[纯场景]\n您也可以选择随机查看，指令【随机纯场景/合成场景】')
-
-@sv.on_fullmatch(["纯场景", "纯场景查询", "查询纯场景"])
-async def wiki_image_scenes_nogoods(bot, ev):
-    await bot.send(ev, f"图片来源个人解包，原图可能较大\n请按游戏内序号选择1-7，如[纯场景1]", at_sender=True)
-
-@sv.on_fullmatch(["合成场景", "合成场景查询", "查询合成场景"])
-async def wiki_image_scenes_withgoods(bot, ev):
-    await bot.send(ev, f"图片来源个人解包，原图可能较大\n请按游戏内序号选择1-7，如[合成场景1]", at_sender=True)
+    await bot.send(ev, f'请选择您要查询的场景：纯场景/合成场景\n您也可以选择随机查看，指令【随机纯场景/合成场景】')
 
 pic1 = R.img('musewiki/artwork/artwork(1).png').cqcode
 sendpic1 = str(pic1)
@@ -481,277 +510,73 @@ author57 = '画师：暂未收录\n'
 author_page57 = '画师主页：暂未收录'
 text57 = title57 + sendpic57 + author57 + author_page57
 
-@sv.on_fullmatch("单图查询1")
-async def send_artwork(bot, ev):
-    info_help = text1
-    mid = ev['message_id']
-    cq_message = f'[CQ:reply,id={mid}]'
-    finalmsg = cq_message + info_help
-    await bot.send(ev, finalmsg)
-@sv.on_fullmatch("单图查询2")
-async def send_artwork(bot, ev):
-    info_help = text2
-    mid = ev['message_id']
-    cq_message = f'[CQ:reply,id={mid}]'
-    finalmsg = cq_message + info_help
-    await bot.send(ev, finalmsg)
-@sv.on_fullmatch("单图查询3")
-async def send_artwork(bot, ev):
-    info_help = text3
-    mid = ev['message_id']
-    cq_message = f'[CQ:reply,id={mid}]'
-    finalmsg = cq_message + info_help
-    await bot.send(ev, finalmsg)
-@sv.on_fullmatch("单图查询4")
-async def send_artwork(bot, ev):
-    info_help = text4
-    mid = ev['message_id']
-    cq_message = f'[CQ:reply,id={mid}]'
-    finalmsg = cq_message + info_help
-    await bot.send(ev, finalmsg)
-@sv.on_fullmatch("单图查询5")
-async def send_artwork(bot, ev):
-    info_help = text5
-    mid = ev['message_id']
-    cq_message = f'[CQ:reply,id={mid}]'
-    finalmsg = cq_message + info_help
-    await bot.send(ev, finalmsg)
-@sv.on_fullmatch("单图查询6")
-async def send_artwork(bot, ev):
-    info_help = text6
-    mid = ev['message_id']
-    cq_message = f'[CQ:reply,id={mid}]'
-    finalmsg = cq_message + info_help
-    await bot.send(ev, finalmsg)
-@sv.on_fullmatch("单图查询7")
-async def send_artwork(bot, ev):
-    info_help = text7
-    mid = ev['message_id']
-    cq_message = f'[CQ:reply,id={mid}]'
-    finalmsg = cq_message + info_help
-    await bot.send(ev, finalmsg)
-@sv.on_fullmatch("单图查询8")
-async def send_artwork(bot, ev):
-    info_help = text8
-    mid = ev['message_id']
-    cq_message = f'[CQ:reply,id={mid}]'
-    finalmsg = cq_message + info_help
-    await bot.send(ev, finalmsg)
-@sv.on_fullmatch("单图查询9")
-async def send_artwork(bot, ev):
-    info_help = text9
-    mid = ev['message_id']
-    cq_message = f'[CQ:reply,id={mid}]'
-    finalmsg = cq_message + info_help
-    await bot.send(ev, finalmsg)
-@sv.on_fullmatch("单图查询10")
-async def send_artwork(bot, ev):
-    info_help = text10
-    mid = ev['message_id']
-    cq_message = f'[CQ:reply,id={mid}]'
-    finalmsg = cq_message + info_help
-    await bot.send(ev, finalmsg)
-@sv.on_fullmatch("单图查询11")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text11)
-@sv.on_fullmatch("单图查询12")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text12)
-@sv.on_fullmatch("单图查询13")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text13)
-@sv.on_fullmatch("单图查询14")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text14)
-@sv.on_fullmatch("单图查询15")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text15)
-@sv.on_fullmatch("单图查询16")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text16)
-@sv.on_fullmatch("单图查询17")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text17)
-@sv.on_fullmatch("单图查询18")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text18)
-@sv.on_fullmatch("单图查询19")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text19)
-@sv.on_fullmatch("单图查询20")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text20)
-@sv.on_fullmatch("单图查询21")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text21)
-@sv.on_fullmatch("单图查询22")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text22)
-@sv.on_fullmatch("单图查询23")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text23)
-@sv.on_fullmatch("单图查询24")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text24)
-@sv.on_fullmatch("单图查询25")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text25)
-@sv.on_fullmatch("单图查询26")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text26)
-@sv.on_fullmatch("单图查询27")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text27)
-@sv.on_fullmatch("单图查询28")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text28)
-@sv.on_fullmatch("单图查询29")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text29)
-@sv.on_fullmatch("单图查询30")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text30)
-@sv.on_fullmatch("单图查询31")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text31)
-@sv.on_fullmatch("单图查询32")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text32)
-@sv.on_fullmatch("单图查询33")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text33)
-@sv.on_fullmatch("单图查询34")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text34)
-@sv.on_fullmatch("单图查询35")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text35)
-@sv.on_fullmatch("单图查询36")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text36)
-@sv.on_fullmatch("单图查询37")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text37)
-@sv.on_fullmatch("单图查询38")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text38)
-@sv.on_fullmatch("单图查询39")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text39)
-@sv.on_fullmatch("单图查询40")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text40)
-@sv.on_fullmatch("单图查询41")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text41)
-@sv.on_fullmatch("单图查询42")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text42)
-@sv.on_fullmatch("单图查询43")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text43)
-@sv.on_fullmatch("单图查询44")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text44)
-@sv.on_fullmatch("单图查询45")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text45)
-@sv.on_fullmatch("单图查询46")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text46)
-@sv.on_fullmatch("单图查询47")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text47)
-@sv.on_fullmatch("单图查询48")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text48)
-@sv.on_fullmatch("单图查询49")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text49)
-@sv.on_fullmatch("单图查询50")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text50)
-@sv.on_fullmatch("单图查询51")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text51)
-@sv.on_fullmatch("单图查询52")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text52)
-@sv.on_fullmatch("单图查询53")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text53)
-@sv.on_fullmatch("单图查询54")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text54)
-@sv.on_fullmatch("单图查询55")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text55)
-@sv.on_fullmatch("单图查询56")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text56)
-@sv.on_fullmatch("单图查询57")
-async def send_artwork(bot, ev):
-    await bot.send(ev, text57)
+text_dict = (text1,text2,text3,text4,text5,text6,text7,text8,text9,text10,text11,text12,text13,text14,text15,text16,text17,text18,text19,text20,text21,text22,text23,text24,text25,text26,text27,text28,text29,text30,text31,text32,text33,text34,text35,text36,text37,text38,text39,text40,text41,text42,text43,text44,text45,text46,text47,text48,text49,text50,text51,text52,text53,text54,text55,text56,text57)
+#使用元组进行选择
+#别问我为什么不单独做个json，问就是想到的时候已经写完了就懒得改了=  =。
 
-@sv.on_fullmatch("纯场景1")
-async def send_scenes(bot, ev):
-    img = R.img('musewiki/scenes/no_goods/Scene01Bg.png').cqcode
-    await bot.send(ev, img)
-@sv.on_fullmatch("纯场景2")
-async def send_scenes(bot, ev):
-    img = R.img('musewiki/scenes/no_goods/Scene02Bg.png').cqcode
-    await bot.send(ev, img)
-@sv.on_fullmatch("纯场景3")
-async def send_scenes(bot, ev):
-    img = R.img('musewiki/scenes/no_goods/Scene03Bg.png').cqcode
-    await bot.send(ev, img)
-@sv.on_fullmatch("纯场景4")
-async def send_scenes(bot, ev):
-    img = R.img('musewiki/scenes/no_goods/Scene04Bg.png').cqcode
-    await bot.send(ev, img)
-@sv.on_fullmatch("纯场景5")
-async def send_scenes(bot, ev):
-    img = R.img('musewiki/scenes/no_goods/Scene05Bg.png').cqcode
-    await bot.send(ev, img)
-@sv.on_fullmatch("纯场景6")
-async def send_scenes(bot, ev):
-    img = R.img('musewiki/scenes/no_goods/Scene06Bg.png').cqcode
-    await bot.send(ev, img)
-@sv.on_fullmatch("纯场景7")
-async def send_scenes(bot, ev):
-    img = R.img('musewiki/scenes/no_goods/Scene07Bg.png').cqcode
-    await bot.send(ev, img)
+@sv.on_prefix(('单图查询'))
+async def send_artwork(bot, ev: CQEvent):
+    s = ev.message.extract_plain_text()
+    if not s:
+        await bot.send(ev, "请发送[单图查询 编号]~")
+        return
+    if s:
+        num = int(s)-1 #下标从0开始，所以要-1
+        output_text = text_dict[num]
+        mid = ev['message_id']
+        cq_message = f'[CQ:reply,id={mid}]'
+        finalmsg = cq_message + output_text
+        await bot.send(ev, finalmsg)
 
-@sv.on_fullmatch("合成场景1")
-async def send_scenes(bot, ev):
-    img = R.img('musewiki/scenes/with_goods/SceneFX01.png').cqcode
-    await bot.send(ev, img)
-@sv.on_fullmatch("合成场景2")
-async def send_scenes(bot, ev):
-    img = R.img('musewiki/scenes/with_goods/SceneFX02.png').cqcode
-    await bot.send(ev, img)
-@sv.on_fullmatch("合成场景3")
-async def send_scenes(bot, ev):
-    img = R.img('musewiki/scenes/with_goods/SceneFX03.png').cqcode
-    await bot.send(ev, img)
-@sv.on_fullmatch("合成场景4")
-async def send_scenes(bot, ev):
-    img = R.img('musewiki/scenes/with_goods/SceneFX04.png').cqcode
-    await bot.send(ev, img)
-@sv.on_fullmatch("合成场景5")
-async def send_scenes(bot, ev):
-    img = R.img('musewiki/scenes/with_goods/SceneFX05.png').cqcode
-    await bot.send(ev, img)
-@sv.on_fullmatch("合成场景6")
-async def send_scenes(bot, ev):
-    img = R.img('musewiki/scenes/with_goods/SceneFX06.png').cqcode
-    await bot.send(ev, img)
-@sv.on_fullmatch("合成场景7")
-async def send_scenes(bot, ev):
-    img = R.img('musewiki/scenes/with_goods/SceneFX07.png').cqcode
-    await bot.send(ev, img)
+scene_1 = R.img('musewiki/scenes/no_goods/Scene01Bg.png').cqcode
+scene_2 = R.img('musewiki/scenes/no_goods/Scene02Bg.png').cqcode
+scene_3 = R.img('musewiki/scenes/no_goods/Scene03Bg.png').cqcode
+scene_4 = R.img('musewiki/scenes/no_goods/Scene03Bg.png').cqcode
+scene_5 = R.img('musewiki/scenes/no_goods/Scene05Bg.png').cqcode
+scene_6 = R.img('musewiki/scenes/no_goods/Scene06Bg.png').cqcode
+scene_7 = R.img('musewiki/scenes/no_goods/Scene07Bg.png').cqcode
 
-@sv.on_fullmatch("全图查询")
+scene_all = (scene_1,scene_2,scene_3,scene_4,scene_5,scene_6,scene_7)
+
+fxscene_1 = R.img('musewiki/scenes/with_goods/SceneFX01.png').cqcode
+fxscene_2 = R.img('musewiki/scenes/with_goods/SceneFX02.png').cqcode
+fxscene_3 = R.img('musewiki/scenes/with_goods/SceneFX03.png').cqcode
+fxscene_4 = R.img('musewiki/scenes/with_goods/SceneFX04.png').cqcode
+fxscene_5 = R.img('musewiki/scenes/with_goods/SceneFX05.png').cqcode
+fxscene_6 = R.img('musewiki/scenes/with_goods/SceneFX06.png').cqcode
+fxscene_7 = R.img('musewiki/scenes/with_goods/SceneFX07.png').cqcode
+
+fxscene_all = (fxscene_1,fxscene_2,fxscene_3,fxscene_4,fxscene_5,fxscene_6,fxscene_7)
+
+@sv.on_prefix(('纯场景'))
+async def send_scene_nog(bot, ev: CQEvent):
+    s = ev.message.extract_plain_text()
+    if not s:
+        await bot.send(ev, "请发送[纯场景 编号]~", at_sender=True)
+        return
+    if s:
+        num = int(s)-1 #下标从0开始，所以要-1
+        output_text = str(scene_all[num])  #和单图查询不同，单图查询已经做了字符处理，但这里要先转换为字符串
+        mid = ev['message_id']
+        cq_message = f'[CQ:reply,id={mid}]'
+        finalmsg = cq_message + output_text
+        await bot.send(ev, finalmsg)
+
+@sv.on_prefix(('合成场景'))
+async def send_scene_withg(bot, ev: CQEvent):
+    s = ev.message.extract_plain_text()
+    if not s:
+        await bot.send(ev, "请发送[合成场景 编号]~", at_sender=True)
+        return
+    if s:
+        num = int(s)-1 #下标从0开始，所以要-1
+        output_text = str(fxscene_all[num])
+        mid = ev['message_id']
+        cq_message = f'[CQ:reply,id={mid}]'
+        finalmsg = cq_message + output_text
+        await bot.send(ev, finalmsg)
+
+@sv.on_fullmatch("全图查询")  #慎用，会发送超长条图片转发消息，可能导致风控
 async def wiki_artwork_all(bot, ev):
     uid = ev['user_id']
     if not _flmt.check(uid):
@@ -759,7 +584,10 @@ async def wiki_artwork_all(bot, ev):
         return
     _flmt.start_cd(uid)
 
-    try:
+    if not priv.check_priv(ev, priv.ADMIN):
+        await bot.send(ev, f"权限不足。为避免滥用，仅群管理及以上权限可用", at_sender=True)
+        return
+    else:
         await bot.send(ev, '图片较多，将合并转发消息，耗时较长，请耐心等待。')
         data_all_1 = []
         data_all_2 = []
@@ -869,16 +697,13 @@ async def wiki_artwork_all(bot, ev):
         await bot.send_group_forward_msg(group_id=ev['group_id'], messages=data_all_2)
         time.sleep(5)
         await bot.send_group_forward_msg(group_id=ev['group_id'], messages=data_all_3)
-    except CQHttpError:
-        sv.logger.error(f"MuseDash百科，发送[全图查询]消息失败")
-        try:
-            await bot.send(ev, '发送消息失败，bot可能被风控')
-        except:
-            pass
+
 
 nogood_folder_scene = R.img('musewiki/scenes/no_goods/').path
-
 withgood_folder_scene = R.img('musewiki/scenes/with_goods/').path
+
+artwork_folder_all = R.img('musewiki/artwork/').path
+song_cover_folder = R.img('musewiki/songcover/').path
 
 def scene_gener_nog():
     while True:
@@ -896,15 +721,39 @@ def scene_gener_with():
             if os.path.isfile(os.path.join(withgood_folder_scene, filename)):
                 yield R.img('musewiki/scenes/with_goods/', filename)
 
+def artwork_gener_all():
+    while True:
+        filelist_art = os.listdir(artwork_folder_all)
+        random.shuffle(filelist_art)
+        for filename in filelist_art:
+            if os.path.isfile(os.path.join(artwork_folder_all, filename)):
+                yield R.img('musewiki/artwork/', filename)
+
+def song_gener_cover():
+    while True:
+        filelist_cover = os.listdir(song_cover_folder)
+        random.shuffle(filelist_cover)
+        for filename in filelist_cover:
+            if os.path.isfile(os.path.join(song_cover_folder, filename)):
+                yield R.img('musewiki/songcover/', filename)
+
 scene_gener_nog = scene_gener_nog()
+scene_gener_with = scene_gener_with()
+
+artwork_gener_all = artwork_gener_all()
+song_gener_cover = song_gener_cover()
 
 def get_nogoods():
     return scene_gener_nog.__next__()
 
-scene_gener_with = scene_gener_with()
-
 def get_withgoods():
     return scene_gener_with.__next__()
+
+def get_artwork():
+    return artwork_gener_all.__next__()
+
+def get_song_cover():
+    return song_gener_cover.__next__()
 
 @sv.on_fullmatch(["随机纯场景"])
 async def wiki_scene_nogood(bot, ev):
@@ -929,3 +778,151 @@ async def wiki_scene_withgood(bot, ev):
             await bot.send(ev, '发送图片失败...')
         except:
             pass
+
+@sv.on_fullmatch(["随机插画"])
+async def wiki_artwork_all(bot, ev):
+    pic = get_artwork()
+    try:
+        await bot.send(ev, pic.cqcode)
+    except CQHttpError:
+        sv.logger.error(f"MuseDash百科-插图查询，发送图片{pic.path}失败")
+        try:
+            await bot.send(ev, '发送图片失败...')
+        except:
+            pass
+    
+@sv.on_fullmatch(["随机封面"])
+async def wiki_song_cover(bot, ev):
+    pic = get_song_cover()
+    try:
+        await bot.send(ev, pic.cqcode)
+    except CQHttpError:
+        sv.logger.error(f"MuseDash百科-插图查询，发送图片{pic.path}失败")
+        try:
+            await bot.send(ev, '发送图片失败...')
+        except:
+            pass
+
+svpush_help = '''
+※百科插画推送※
+- [启用百科插画推送]  每天上午7点与下午2点推送
+- [禁用百科插画推送]  禁用
+'''.strip()
+
+svpush = Service(
+    name = '百科插画推送',  #功能名
+    use_priv = priv.NORMAL, #使用权限   
+    manage_priv = priv.ADMIN, #管理权限
+    visible = True, #是否可见
+    enable_on_default = False, #是否默认启用
+    bundle = 'musedash', #属于哪一类
+    help_ = svpush_help #帮助文本
+    )
+
+@sv.on_fullmatch(["帮助百科插画推送"])
+async def bangzhu_push_artwork(bot, ev):
+    await bot.send(ev, svpush_help)
+    
+@svpush.scheduled_job('cron', hour='14', minute='00') #下午2点推送
+async def wiki_push_artwork_a():
+    bot = hoshino.get_bot()
+    glist = await svpush.get_enable_groups()
+    info_head = '今日MuseDash插画推送(2)'
+    msg = random.choice(text_dict)
+    for gid, selfids in glist.items():
+        sid = random.choice(selfids)
+        await bot.send_group_msg(self_id=sid, group_id=gid, message=info_head)
+        await bot.send_group_msg(self_id=sid, group_id=gid, message=msg)
+    
+@svpush.scheduled_job('cron', hour='7', minute='00') #上午7点推送
+async def wiki_push_artwork_b():
+    bot = hoshino.get_bot()
+    glist = await svpush.get_enable_groups()
+    info_head = '今日MuseDash插画推送(1)'
+    msg = random.choice(text_dict)
+    for gid, selfids in glist.items():
+        sid = random.choice(selfids)
+        await bot.send_group_msg(self_id=sid, group_id=gid, message=info_head)
+        await bot.send_group_msg(self_id=sid, group_id=gid, message=msg)
+
+
+mvinfo_1 = '''
+Muse Dash启动！
+画师：JACKY SUN
+画师主页：暂未收录
+'''.strip()
+mvinfo_2 = '''
+一起来做软乎乎的梦吧w
+画师：忍忍
+画师主页：https://m.weibo.cn/u/1147272555
+'''.strip()
+mvinfo_3 = '''
+Happy Halloween！
+画师：图乌吐
+画师主页：twitter@thurim6
+'''.strip()
+mvinfo_4 = '''
+今天也要打包那么多圣诞礼物么...
+画师：mil7uka
+画师主页：https://m.weibo.cn/u/5890309364
+'''.strip()
+mvinfo_5 = '''
+haloooo？是来自新世界的粉红兔兔！
+画师：mayu
+画师主页：https://m.weibo.cn/u/3612639510
+'''.strip()
+mvinfo_6 = '''
+请问您今天要来点nanahira吗？
+画师：Nanahira & VINOVIS
+画师主页：
+Nanahira：https://www.youtube.com/channel/UC_fYA9QRK-aJnFTgvR_4zug
+VINOVIS：twitter@inh__sy
+'''.strip()
+mvinfo_7 = '''
+欢迎来到MuseDash新春嘉年华！
+画师：寺田てら
+画师主页：twitter@trcoot
+'''.strip()
+mvinfo_8 = '''
+一起来做坏事吧！
+画师：魚介（おののいもこ）
+画师主页：twitter@_himehajime
+'''.strip()
+mvinfo_9 = '''
+NEKO#ΦωΦ 的实况时间——
+「Muse Daaaaaaaaaaash！」
+画师：狗肉
+画师主页：https://m.weibo.cn/u/2899151975
+'''.strip()
+mvinfo_10 = '''
+歌手瑪莉嘉、滅火器手凜、伴奏布若，R.M.B 樂隊傾情演繹，
+「穿透靈魂的聲音」，「絕美的音樂」「先進的交互體驗」與「動感 MV」 ，盡在 Muse Festival
+画师：PeroPeroGames 实属顶级画师团队倾情钜献
+画师主页：暂未收录
+'''.strip()
+mvinfo_11 = '''
+爱——在霓虹電台
+画师：mil7uka
+画师主页：https://m.weibo.cn/u/5890309364
+'''.strip()
+
+
+mvinfo_all = (mvinfo_1,mvinfo_2,mvinfo_3,mvinfo_4,mvinfo_5,mvinfo_6,mvinfo_7,mvinfo_8,mvinfo_9,mvinfo_10,mvinfo_11)
+@sv.on_prefix(('动画查询'))
+async def send_mv(bot, ev: CQEvent):
+    s = ev.message.extract_plain_text()
+    if not s:
+        await bot.send(ev, "请发送[动画查询 编号]~", at_sender=True)
+        return
+    if s:
+        num = int(s)-1 #下标从0开始，所以要-1
+        output = mvinfo_all[num]
+        data = {
+            "type": "video",
+            "data": {
+                "file": f"file:///C:/Resources/img/musewiki/artwork_moive/{s}.mp4"
+                }
+            }
+        await bot.send(ev, output)
+        time.sleep(1)
+        await bot.send(ev, data)

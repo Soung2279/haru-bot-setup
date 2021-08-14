@@ -1,13 +1,19 @@
-import requests, asyncio, os, time
+# -*- coding: utf-8 -*-
+from time import time
+import requests, asyncio, os, time, random
 from asyncio import events
 from nonebot.exceptions import CQHttpError
+from datetime import datetime
+import pytz
 import hoshino
 from hoshino import Service, priv, aiorequests, R
 from hoshino.typing import CQEvent, MessageSegment
-from . import chara
-from hoshino.modules.musedash import _song_data
-from operator import __iadd__
 from hoshino.util import FreqLimiter, escape, DailyNumberLimiter
+from . import chara
+from . import _song_data
+from operator import __iadd__
+
+tz = pytz.timezone('Asia/Shanghai')
 
 _max = 1
 _nlmt = DailyNumberLimiter(_max)
@@ -16,12 +22,24 @@ Wiki_Menu_Achievement_img = R.img(f"musewiki/etc/achieve.png").cqcode
 Wiki_show_Achieve_img_1 = R.img(f"musewiki/etc/SprTrophy.png").cqcode
 Wiki_show_Achieve_img_2 = R.img(f"musewiki/etc/DiamomdTrophy0000.png").cqcode
 
-sv_help = '''
-※MuseDash百科-成就查询※
+tips_tuple = _song_data.Muse_Tips
 
-[查询成就]  进入查询菜单
-[单曲成就查询]  查询单曲关卡成就
-[游戏成就查询]  查询游戏成就
+sv_help = '''
+    ※MuseDash百科-成就查询※
+当前菜单有以下内容：
+    -成就查询 -
+- [查询成就]  进入查询菜单
+- [单曲成就查询]  查询单曲关卡成就
+- [游戏成就查询]  查询游戏成就
+
+或发送以下指令进入其它菜单：
+- [帮助百科资料查询]
+- [帮助百科插图查询]
+- [帮助md百科]
+- [帮助百科语音查询]
+- [帮助百科角色查询]
+- [帮助百科歌曲推送]
+- [帮助百科运势]
 '''.strip()
 
 sv = Service(
@@ -35,7 +53,7 @@ sv = Service(
     )
 
 def get_voice_achieve_menu():
-    filename = 'AchievementBgm.wav'
+    filename = 'AchievementBgm.wav'  #首次使用菜单时的BGM
     voice_rec = R.get('record/musewiki/audioclip/', filename)
     return voice_rec
 
@@ -44,12 +62,37 @@ async def bangzhu_musewiki_achievement(bot, ev) -> MessageSegment:
     file = get_voice_achieve_menu()
     voice_rec = MessageSegment.record(f'file:///{os.path.abspath(file.path)}')
     uid = ev['user_id']
+    now_hour=datetime.now(tz).hour
+    if 0<=now_hour<6:  #凌晨
+        tips = random.choice(tips_tuple)
+        greetings = '(｡･∀･)ﾉﾞ凌晨好！'
+        await bot.send(ev, greetings + tips)
+    elif 8<=now_hour<12:  #上午
+        tips = random.choice(tips_tuple)
+        greetings = '(((o(*ﾟ▽ﾟ*)o)))上午好！'
+        await bot.send(ev, greetings + tips)
+    elif 12<=now_hour<14:  #中午
+        tips = random.choice(tips_tuple)
+        greetings = '(o゜▽゜)o☆中午好！'
+        await bot.send(ev, greetings + tips)
+    elif 14<=now_hour<18:  #下午
+        tips = random.choice(tips_tuple)
+        greetings = 'o(^▽^)o下午好！'
+        await bot.send(ev, greetings + tips)
+    elif 18<=now_hour<21:  #晚上
+        tips = random.choice(tips_tuple)
+        greetings = '♪(´∇`*)晚上好！'
+        await bot.send(ev, greetings + tips)
+    elif 21<=now_hour<24:  #深夜
+        tips = random.choice(tips_tuple)
+        greetings = '✧(≖ ◡ ≖✿)深夜好！'
+        await bot.send(ev, greetings + tips)
     if not _nlmt.check(uid):
         await bot.send(ev, f"欢迎继续使用MuseDash百科-成就查询！")
     else:
         await bot.send(ev, voice_rec)
-
     _nlmt.increase(uid)
+
     final_output = Wiki_Menu_Achievement_img + sv_help
     await bot.send(ev, final_output)
 
@@ -82,13 +125,20 @@ def keyword_search_ach(keyword):
             result.append(ach)
     return result
 
+
+ACHIEVE_NOTICE = '''
+本功能支持部分呢称，简写，罗马音查询哦
+如果还是查不到，请使用歌曲原名（不要问我日文怎么打啦）
+如果还还还查不到，可以尝试使用官方Wiki上的歌曲名哦
+'''.strip()
 @sv.on_prefix(('单曲成就查询'))
 async def muse_wiki_achieve(bot, ev: CQEvent):
     s = ev.message.extract_plain_text()
-    show_achieve = str(Wiki_show_Achieve_img_1)
+    show_achieve = str(Wiki_show_Achieve_img_1) #要先转为字符串
     if not s:
-        warn = f"请发送[单曲成就查询 歌名]~\n歌名不分大小写\n部分歌名支持呢称\n部分日文歌名支持中文汉字or罗马音\n例如：【单曲成就查询 无人区】"
-        await bot.send(ev, warn)
+        await bot.send(ev, "不告诉我歌名要怎么查询啦！")
+        if random.random() < 0.50:
+            await bot.send(ev, ACHIEVE_NOTICE)
         return
     
     name = escape(ev.message.extract_plain_text().strip())
@@ -100,13 +150,16 @@ async def muse_wiki_achieve(bot, ev: CQEvent):
         id_, guess_name, confi = chara.guess_id(name)
         guess = True
     c = chara.fromid(id_)
-    if confi < 60:
+    if confi < 60:  #可能性设置，如果可能性低于设置的值则bot不会有所回应
+        await bot.send(ev, "阿八阿八，是脸滚到键盘了嘛=  =。")
         return
     
     if guess:
-        msg = f'未找到"{name}"，可能是输入有误或未收录...'
+        msg = f'没有找到歌曲"《{name}》"哦！可能是输入有误或未收录...\n（也可能是bot太笨了qaq'
         await bot.send(ev, msg)
-        msg = f'您有{confi}%的可能在找{guess_name}'
+        if random.random() < 0.50:
+            await bot.send(ev, ACHIEVE_NOTICE)
+        msg = f'我猜您有{confi}%的可能在找{guess_name}哦'
         await bot.send(ev, msg)
 
     if s:
@@ -115,8 +168,8 @@ async def muse_wiki_achieve(bot, ev: CQEvent):
             await bot.send(ev, f'未找到含有关键词"{s}"的歌曲...')
             return
         elif len(available_songs) > 1:
-            msg_part = '\n'.join(['• ' + song for song in available_songs])
-            await bot.send(ev, f'从曲库中找到了这些:\n{msg_part}\n您想找的是哪首呢~')
+            msg_part = '\n'.join(['• %d'%song for song in available_songs])
+            await bot.send(ev, f'好像有很多相似的歌曲哦~:\n{msg_part}\n您想找的是哪首呢~')
             return
         else:
             ach_info_1, song_cover, ach_info_2, acg_data =  await get_ach_info_from_song(available_songs[0])
@@ -128,38 +181,46 @@ async def muse_wiki_achieve(bot, ev: CQEvent):
 GAME_ACHIEVEMENT_1 = '''
 MuseDash游戏目前有以下成就：
 
-【第一次】  成功通关一个10级以上的关卡。
-【弱者中的强者】  成功通关30个萌新难度关卡。
-【中流砥柱】  成功通关30个高手难度关卡。
-【你已经是大佬啦】  成功通关30个大触难度关卡。
-【放弃治疗(隐藏)】  在不获得任何红心的前提下成功通关一个7级以上的关卡。
-【这也行? (隐藏)】  在不击退任何敌人的前提下成功通关一个关卡。
-【在哪里跌倒，就在哪里再次跌倒(隐藏)】  同一关卡的累计通关失败次数达到5。
-【人生好艰难(隐藏)】  累计通关失败次数达到20。
-【C】  取得10次“C”评价。
-【B】  取得10次“B”评价。
-【A】  取得10次“A”评价。
-【S】  在一个10级以上的关卡中取得“S” 评价。
-【Full Combo!!】  在一个10级以上的关卡中取得全连。
+【第一次】  成功通关一个 4/7/10 级以上的关卡。
+【弱者中的强者】  成功通关 10/20/30 个萌新难度关卡。
+【中流砥柱】  成功通关 10/20/30 个高手难度关卡。
+【你已经是大佬啦】  成功通关 10/20/30 个大触难度关卡。
+【放弃治疗(隐藏)】  在不获得任何红心的前提下成功通关一个 7 级以上的关卡。
+【这也行？ (隐藏)】  在不击退任何敌人的前提下成功通关一个关卡。
+【在哪里跌倒，就在哪里再次跌倒(隐藏)】  同一关卡的累计通关失败次数达到 5/10 。
+【人生好艰难(隐藏)】  累计通关失败次数达到 20 。
+【C】  取得 10 次“C”评价。
+【B】  取得 10 次“B”评价。
+【A】  取得 10 次“A”评价。
+【S】  在一个 4/7/10 级以上的关卡中取得“S” 评价。
+【人生巅峰（隐藏）】  在一个 7/10 级以上的关卡中取得 100% 准确率。
+【Full Combo！！】  在一个 4/7/10 级以上的关卡中取得全连。
+【连击大师】  在 10/30/50/80 个不同的关卡中取得全连。
+【就差一个(隐藏)】  成功通关一个 7 级以上的关卡，且仅“Miss” 一次。
+【倒在终点(隐藏)】  在一个 7 级以上的关卡中通关失败，且恰好在最后一个敌人/障碍处“Miss” 时耗尽生命值。
 …………
 '''.strip()
 
 GAME_ACHIEVEMENT_2 = '''
-【连击大师】  在80个不同的关卡中取得全连。
-【就差一个(隐藏)】  成功通关一个7级以上的关卡，且仅“Miss” 一次。
-【倒在终点(隐藏)】  在一个7级以上的关卡中通关失败，且恰好在最后一个敌人/障碍处“Miss” 时耗尽生命值。
-【破五百!】  在一次游玩中取得500以上的最大连击数。
-【见招拆招】  累计击退20000个敌人或BOSS远程攻击。
-【贴身战斗】  累计击退200次BOSS近身攻击。
-【SOLO】  累计完整演奏500个乐谱(长按)。
-【躲闪大师】  累计躲避2000个障碍。
-【意识流】  累计击退500个幽灵。
-【爱可敌国】  累计收集500个红心。
-【音符收集者】  累计收集500个音符。
-【左右开弓】  在演奏乐谱 (长按)时累计击退500个敌人或BOSS远程攻击。
-【小姐姐都是我的】  解锁12款角色皮肤
-【我养你吧】  累计收集8只精灵
-【插图收集】  累计收集10个插图
+【差一点就完美（隐藏）】  在一个 7 级以上的关卡中获得全连，且除最后一次击退敌人时取得“Great”判定外，其余均为“Perfect”判定。
+【破百！】  在一次游玩中取得 100 以上的最大连击数。
+【破两百！】  在一次游玩中取得 200 以上的最大连击数。
+【破三百！】  在一次游玩中取得 300 以上的最大连击数。
+【破五百！】  在一次游玩中取得 500 以上的最大连击数。
+【见招拆招】  累计击退 2000/5000/10000/20000 个敌人或BOSS远程攻击。
+【贴身战斗】  累计击退 20/50/100/200 次BOSS近身攻击。
+【SOLO】  累计完整演奏 50/100/200/500 个乐谱(长按)。
+【躲闪大师】  累计躲避 200/500/1000/2000 个障碍。
+【意识流】  累计击退 50/100/250/500 个幽灵。
+【爱可敌国】  累计收集 50/100/250/500 个红心。
+【音符收集者】  累计收集 50/100/250/500 个音符。
+【左右开弓】  在演奏乐谱 (长按)时累计击退 50/100/250/500 个敌人或BOSS远程攻击。
+【小姐姐都是我的】  解锁 2/7/12 款角色皮肤
+【我养你吧】  累计收集 1/4/8 只精灵
+【插图收集】  累计收集 2/6/10 个插图
+【一个都不能少（隐藏）】  完成基础包的所有关卡成就。
+【无敌是多么寂寞（隐藏）】  达成所有成就。
+【全员战败（隐藏）】  所有角色均通关失败过。
 END.
 '''.strip()
 
@@ -168,5 +229,5 @@ async def wiki_achievement_game(bot, ev):
     final_1 = Wiki_show_Achieve_img_2 + GAME_ACHIEVEMENT_1
     final_2 = Wiki_show_Achieve_img_2 + GAME_ACHIEVEMENT_2
     await bot.send(ev, final_1)
-    time.sleep(5)
+    time.sleep(3)
     await bot.send(ev, final_2)
