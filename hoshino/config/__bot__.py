@@ -26,17 +26,17 @@ RES_URL = 'http://127.0.0.1:5000/static/'
 
 # 需要用到的API
 # - 涩图相关
-lolicon_api = '710713975eddf763c285f5'
-acggov_api = 'eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJTb3VuZzIyNzkiLCJ1dWlkIjoiMTc5MjE3YjZkMWNlNGVjYWE2NTc2M2RjM2NmYjUyNjQiLCJpYXQiOjE1OTUzMDk5MTcsImFjY291bnQiOiJ7XCJlbWFpbFwiOlwiaGlyYXNhd2FzdUBmb3htYWlsLmNvbVwiLFwiZ2VuZGVyXCI6LTEsXCJoYXNQcm9uXCI6MCxcImlkXCI6MzksXCJwYXNzV29yZFwiOlwiYWZkZDBiNGFkMmVjMTcyYzU4NmUyMTUwNzcwZmJmOWVcIixcInN0YXR1c1wiOjAsXCJ1c2VyTmFtZVwiOlwiU291bmcyMjc5XCJ9IiwianRpIjoiMzkifQ.3k1A89jKX8jiF2d80yP2L5EHC-tP2xLFLaqj10LxleQ'
+lolicon_api = 'xxx'
+acggov_api = 'xxx'
 
 # - 搜图相关
-saucenao_api = 'b8952ab6f38f1821b4d4b132891245e9347df641'
-pixiv_id = '2279134404@qq.com'
-pixiv_password = 'Aa123456'
+saucenao_api = 'xxx'
+pixiv_id = 'xxx'
+pixiv_password = 'xxx'
 
 #【Error】因API失效，已弃用
-aichat_api_ID = '2151738429'
-aichat_api_KEY = 'YktgDw71PBeqPaEC'
+aichat_api_ID = 'xxx'
+aichat_api_KEY = 'xxx'
 
 
 # 启用的模块
