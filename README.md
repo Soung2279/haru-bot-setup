@@ -22,6 +22,7 @@ HoshinoBot-Harubot是基于[Go-cqhttp](https://github.com/Mrs4s/go-cqhttp)，[Ho
 与市面上大多数HoshinoBot及其衍生不同的是，harubot具有以下独特的功能。
 - [x] **（伪）全局消息合并转发**
 - [x] **（伪）全局消息定时撤回**
+- [x] **原生Hoshino的语音调用支持**
 - [x] 风格统一，完善的指令说明
 - [x] 统一文件配置参数
 - [ ] 自定义适配的功能模块（逐步魔改中）
@@ -136,26 +137,33 @@ HoshinoBot-Harubot是基于[Go-cqhttp](https://github.com/Mrs4s/go-cqhttp)，[Ho
 ##### 完整：
 
 ```python
+# 启用的模块
 MODULES_ON = {
-    'advance_check',
-    #'aichat', #腾讯智能闲聊
+    '300hero', #300英雄出租查询
+    '5000choyen', #5000兆元（红白字）图片生成器
+    'advance_check', #服务器增强自检
+    'aichat', #腾讯智能闲聊（新）
     'aircon', #群空调
     #'anticoncurrency', #反并发
     'arcaea', #Arcaea查询
+    'asill', #A-SOUL发病小作文
     'bandori', #邦邦车站
-    'bilidynamicpush', #B站动态
-    'bilisearchspider', #B站爬虫
-    'botchat', #语言库
+    'bh3_calendar', #崩坏3日历
+    #'bilidynamicpush', #B站动态
+    #'bilisearchspider', #B站爬虫
+    #'botchat', #语言库
     'botmanage', #bot功能性管理
+    'cp', #土味情话
     'check', #服务器自检
-    'CQTwitter', #推特推送
+    #'CQTwitter', #推特推送
     'dasima', #大司马发病评论
-    'destiny2', #命运2
+    #'destiny2', #命运2
     'dice', #骰子
     'emergeface', #换脸
     #'epixiv', #pixiv搜图
     'eqa', #问答
     'explosion', #爆裂魔法
+    'falali', #-------------------
     'fishf14', #ff14钓鱼
     'flac', #无损音乐
     'functions', #小功能合集
@@ -165,29 +173,34 @@ MODULES_ON = {
     'guaihua', #涩涩的翻译
     'hedao', #合刀计算
     'hiumsentences', #网抑云
-    'horsenews', #赛马娘新闻
-    'hourcall', #整点时报
+    'holiday', #假期查询
+    #'horsenews', #赛马娘新闻
+    #'hourcall', #整点时报
     'image_generate', #表情包生成
     'KFCgenshin', #原神二刺螈语音
+    'maimaiDX', #maimaiDX查询
     'majsoul', #雀魂查询
+    'mem_birthday', #群友生日提醒
     'memberguess', #猜群友
-    'mikan', #蜜柑推送
+    #'mikan', #蜜柑推送
+    'musedash', #MuseDash百科
     'music', #点歌
     'nbnhhsh', #谜语人翻译
     'nmsl', #抽象话转换
     'nowtime', #锁屏报时
-    'pcr_calendar', #pcr日历
-    'pcrbirth', #pcr生日提醒
+    #'pcr_calendar', #pcr日历
+    #'pcrbirth', #pcr生日提醒
     'pcrmemorygames', #pcr记忆游戏
-    'pcrmiddaymusic', #pcr午间音乐
-    'pcrsealkiller', #pcr海报杀手
-    'pcrwarn', #pcr定时提醒
+    #'pcrmiddaymusic', #pcr午间音乐
+    #'pcrsealkiller', #pcr海报杀手
+    #'pcrwarn', #pcr定时提醒
+    'picfinder_take', #搜图
     'pokemanpcr', #pcr戳一戳
     'portune', #pcr运势
     'priconne', #pcr小游戏相关
     'pulipuli', #反bilibili小程序
+    #'r6_anti_hacker', #---------------------
     'revgif', #倒放gif
-    'saucenao', #识别图片
     'setu', #本地涩图
     'setu_renew', #在线涩图
     'shaojo', #今天是什么少女
@@ -199,8 +212,9 @@ MODULES_ON = {
     'voiceguess', #猜语音
     'weather', #天气查询
     'whattoeat', #今天吃什么
-    'wordcloud', #词云
-    'zhihu' #知乎日报
+    #'wordcloud', #词云
+    'zhihu', #知乎日报
+    #'test',
 }
 ```
 
@@ -460,6 +474,33 @@ from hoshino import config #读取配置文件
 bot最终输出的地方可以简单通过查找`bot.send`,`bot.finish`等查看。具体请参考[消息触发器](https://github.com/pcrbot/hoshinobot-development-documentation/blob/master/trigger.md)
 
 **完整**的添加代码可在模板文件`hoshino/modules/_example_/_example_.py`中查看。
+
+
+======
+如果需要使用增强的**原生Hoshino语音调用**功能，请将您的语音文件放置在 ``资源库文件夹/record/`` 路径下，资源库文件夹填写位置：``hoshino/config/_bot_.py`` 的 ``RES_DIR``
+
+以下是一个简单例子：
+
+```python
+import hoshino
+from hoshino import R
+
+xxx = R.rec(xxx/xxx.mp3).cqcode
+...
+await bot.send(ev, xxx)
+```
+
+具体可前往 [HoshinoBot功能性增强-语音调用支持](Https://github.com/Soung2279/advance_R)
+
+
+======
+在 Harubot 中，部分地方使用 “NICKNAME[0]” 来获取bot呢称，若您的bot呢称数据结构不为 元组 或 字典，则可能导致无法调用，请自行于 ``hoshino/config/_bot_.py`` 修改 ``NICKNAME`` 为元组形式。
+
+以下是一个简单例子：
+
+```python
+NICKNAME = ('小晴','野中晴','haru','@756160433')          # 机器人的昵称。呼叫昵称等同于@bot，可用元组配置多个昵称
+```
 
 ---
 ### 自定义
