@@ -53,7 +53,7 @@ sv = Service(
     )
 
 def get_voice_achieve_menu():
-    filename = 'AchievementBgm.wav'  #首次使用菜单时的BGM
+    filename = 'AchievementBgm.wav'
     voice_rec = R.get('record/musewiki/audioclip/', filename)
     return voice_rec
 

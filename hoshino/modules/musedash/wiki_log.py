@@ -18,7 +18,7 @@ TIPS_DATA_LEN = _song_data.Muse_Tips
 CHIP_DATA_LEN = _chip_data.CHIP_DATA
 CHARA_DATA_LEN = _chip_data.CHARA_DATA
 
-wiki_ver = '1.0.1'
+wiki_ver = '1.0.5'
 
 sv = Service(
     name = '_MDWIKI_LOG_',
@@ -31,10 +31,11 @@ sv = Service(
     )
 
 MD_WIKI_LOG = '''
-2021.8.15 bot更新日志
+2021.8.26 bot更新日志
 =====================
-百科正常运行
-版本：V1.0.1
+去除绝对路径的使用，理论上可直接适配Linux环境
+部分逻辑优化
+版本：V1.0.5
 =====================
 '''.strip()
 
@@ -53,15 +54,16 @@ async def check_github_wiki(bot, ev):
     data = {
         "type": "share",
         "data": {
-            "url": "http://github.com/Soung2279",
+            "url": "http://github.com/Soung2279/musewiki",
             "title": "MuseDash百科@Github",
             "content": "HoshinoBot插件：MuseDash百科",
             }
         }
-    if check == '756160433':
-        await bot.send(ev, f"{MD_WIKI_LOG}")
-    else:
-        await bot.send(ev, data)
+    #if check == '756160433':
+    #    await bot.send(ev, f"{MD_WIKI_LOG}")
+    #else:
+    await bot.send(ev, data)
+    await bot.send(ev, f"{MD_WIKI_LOG}")
 
 
 def countFile(dir):
@@ -75,6 +77,7 @@ def countFile(dir):
 
 @sv.on_fullmatch(["检查百科文件", "查看百科文件"])
 async def check_main_wiki(bot, ev):
+    main_path = hoshino.config.RES_DIR  #使用在 _bot_.py 里填入的资源库文件夹
     gid = ev['group_id']
     now = datetime.now()  #获取当前时间
     hour = now.hour  #获取当前时间小时数
@@ -90,12 +93,12 @@ async def check_main_wiki(bot, ev):
     all_tips = len(TIPS_DATA_LEN)
     all_chips = len(CHIP_DATA_LEN)
     all_charas = len(CHARA_DATA_LEN)
-    image_all_num = countFile("C:/Resources/img/musewiki/")
-    image_artwork_num = countFile("C:/Resources/img/musewiki/artwork/")
-    image_songcover_num = countFile("C:/Resources/img/musewiki/songcover/")
-    record_all_num = countFile("C:/Resources/record/musewiki/")
-    record_song_demos_num = countFile("C:/Resources/record/musewiki/song_demos/")
-    record_title_num = countFile("C:/Resources/record/musewiki/title/")
+    image_all_num = countFile(str(main_path+"img/musewiki/"))
+    image_artwork_num = countFile(str(main_path+"img/musewiki/artwork/"))
+    image_songcover_num = countFile(str(main_path+"img/musewiki/songcover/"))
+    record_all_num = countFile(str(main_path+"record/musewiki/"))
+    record_song_demos_num = countFile(str(main_path+"record/musewiki/song_demos/"))
+    record_title_num = countFile(str(main_path+"record/musewiki/title/"))
 
     text1 = f"【发送权限检查】：\n是否能发送图片:{image_check}\n是否能发送语音:{record_check}"
     text2 = f"【数据存储检查】：\n已录入的歌曲数量:{all_songs}\n已录入的TIPS数量:{all_tips}\n已录入的角色数量:{all_chips}\n已录入的精灵数量:{all_charas}"

@@ -31,10 +31,10 @@ class Roster:
             n = util.normalize_str(sname)
   
             if n not in self._roster:
-                self._roster[n] = idx
+                    self._roster[n] = idx
             else:
-                logger.warning(f'MuseDash:chara: 出现重名{n}于id{idx}与id{self._roster[n]}')
-                pass
+                    logger.warning(f'MuseDash:chara: 出现重名{n}于id{idx}与id{self._roster[n]}')
+                    pass
 
         self._all_name_list = self._roster.keys()
 
@@ -46,6 +46,7 @@ class Roster:
     def guess_id(self, name):
         """@return: id, name, score"""
         name, score = process.extractOne(name, self._all_name_list)#, #processor=util.normalize_str)
+        #print(self._roster[name], name, score)
         return self._roster[name], name, score
 
 

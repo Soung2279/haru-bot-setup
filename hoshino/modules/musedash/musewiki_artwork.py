@@ -16,10 +16,10 @@ tz = pytz.timezone('Asia/Shanghai')
 _max = 1
 _nlmt = DailyNumberLimiter(_max)
 
-forward_msg_name = 'SoungBot测试版'  #全图查询时，转发消息使用的呢称
-forward_msg_uid = '756160433'  #全图查询时，转发消息使用的画像
+forward_msg_name = 'SoungBot测试版'
+forward_msg_uid = '756160433'
 
-_cd = 300  #全图查询调用间隔冷却时间(s)  为避免被风控，建议调高
+_cd = 300  #调用间隔冷却时间(s)  为避免被风控，建议调高
 _flmt = FreqLimiter(_cd)
 
 Wiki_Menu_Artwork_img = R.img(f"musewiki/etc/artwork.png").cqcode
@@ -60,7 +60,7 @@ sv = Service(
     )
 
 def get_voice_artwork_menu():
-    filename = 'TroveBgm.wav'  #首次使用菜单时的BGM
+    filename = 'TroveBgm.wav'
     voice_rec = R.get('record/musewiki/audioclip/', filename)
     return voice_rec
 
@@ -905,6 +905,7 @@ mvinfo_11 = '''
 画师：mil7uka
 画师主页：https://m.weibo.cn/u/5890309364
 '''.strip()
+
 
 
 mvinfo_all = (mvinfo_1,mvinfo_2,mvinfo_3,mvinfo_4,mvinfo_5,mvinfo_6,mvinfo_7,mvinfo_8,mvinfo_9,mvinfo_10,mvinfo_11)

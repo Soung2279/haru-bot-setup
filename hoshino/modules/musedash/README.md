@@ -10,8 +10,6 @@ MuseDashWiki
 ===========================
 <div align="left">
 
-#### 原项目地址
-- [musewiki](https://github.com/Soung2279/musewiki)
 
 →→ **[查看更新日志](#更新日志)**
 
@@ -36,10 +34,14 @@ MuseDashWiki
 - ……
 
 在以下环境下，插件已经过测试：
+- [x] ``Windows 10``
+- [x] ``Windows 11``
 - [x] ``python 3.8.5 32&64bit``
 - [x] ``python 3.8.9 32&64bit``
 - [x] ``Hoshinobot V2.0``
-- [ ] 理论上支持``nonebot 1.6.0+``，``python 3.9``
+- [ ] 理论上支持 ``nonebot 1.6.0+``，``python 3.9``
+
+> 由于本人不熟悉Linux环境，且插件全程都是在Windows环境下编写的，在Linux上使用可能有bug，请见谅（理论上来说是没有的）
 
 **不适用于 ``nonebot2`` ！** ~~（其实是不知道咋从nb1迁移到nb2）~~
 
@@ -49,9 +51,11 @@ MuseDashWiki
   <summary>通过github克隆</summary>
 
 在**hoshino/modules**文件夹中，打开cmd或者powershell，输入以下代码按回车执行：
+
 ```powershell
 git clone https://github.com/Soung2279/musewiki.git
 ```
+
 之后关闭cmd或powershell，打开**hoshino/config**的`__bot__.py`文件，在**MODULES_ON** = {}里添加 ``musewiki``
 ```python
 # 启用的模块
@@ -62,6 +66,10 @@ MODULES_ON = {
     'xxx',
 }
 ```
+
+之后将本文件夹中的 ``R.py`` 移动至 ``hoshino`` 路径下（覆盖原来的 R.py）
+
+如果未在本文件夹下找到 ``R.py`` ，可前往 [HoshinoBot功能性增强-语音调用支持](https://github.com/Soung2279/advance_R)
 
 </details>
 
@@ -82,33 +90,15 @@ MODULES_ON = {
 }
 ```
 
+之后将本文件夹中的 ``R.py`` 移动至 ``hoshino`` 路径下（覆盖原来的 R.py）
+
+如果未在本文件夹下找到 ``R.py`` ，可前往 [HoshinoBot功能性增强-语音调用支持](https://github.com/Soung2279/advance_R)
+
 </details>
 
 插件安装完成后，可使用基本的**歌曲/角色/精灵查询**功能。但由于本插件使用了 大量图片/语音资源 ，需要进行资源包的补充。
-
-资源包：
-~~通过Release下载(如果有的话)~~  可在原项目地址Release查看
 <details>
   <summary>百度网盘</summary>
-
-- [资源包汇总](https://pan.baidu.com/s/1n2iqwG8ciT5DXPpTRL6jSQ)
-> 提取码：2279
-
-- [语音资源包-1.57G](https://pan.baidu.com/s/1uu8NpD6GT2RxWaVS_K4o8A)
-> 包含demo歌曲，角色语音，菜单bgm等
-> 提取码：2279
-
-- [图片资源包-949MB](https://pan.baidu.com/s/1RJgK26UIDoKxRYGsPXq_cQ)
-> 包含歌曲封面图片，角色/精灵图片，UI等
-> 提取码：2279
-
-</details>
-
-<details>
-  <summary>qq群文件</summary>
-
-[SoungBot交流群（free edition](https://jq.qq.com/?_wv=1027&k=rKLpjTPz)
-> 推荐在百度网盘不可用 or 下载过于缓慢的时候使用
 </details>
 
 ### 指令
@@ -155,34 +145,50 @@ MODULES_ON = {
 
 ### 说明
 
-一定要将**语音资源包**放在``C:/Resources/``目录下！如果没有这个目录就自己新建文件夹  ~~除非你想自己麻烦一点，改一下语音的路径~~
-**图片资源包**请放在Hoshinobot的img目录下（就是你在 ``——bot——.py`` 文件里填写的资源路径）
-最懒的方法就是都放在``C:/Resources/``里
+**语音资源包** 与 **图片资源包** 请放在HoshinoBot的 ``record`` 和 ``img`` 目录下
 
-> 为什么一定要这么放呢？
-> 因为在使用语音上，大量使用了直接指定路径的语句
-> 例如 *[CQ:record,file=file:///C:/Resources/xxx.wav]*
-> 但是使用图片就直接使用的Hoshinobot的R模块
-> 例如 *xxx_img = R.img(musewiki/xxx.png).cqcode*
+例如：你在**hoshino/config**的 `__bot__.py` 文件中填写的 **资源库文件夹**
+```python
+RES_DIR = "C:/Resources/"
+```
+那么你存放 语音资源包 的路径应该为
+``C:/Resources/record/``
+图片同理
 
+> 2021/8/26，增加R模块更新，去除绝对路径的使用
+> 调用方式： *xxx = R.rec(xxx.wav).cqcode*
 > 还有一些其它的可以自己改的我都写在文件注释里面了。
 
 <details>
   <summary>文件说明（可略）</summary>
 
 大致说明一下插件文件：
+
 ``_chip_data.py`` 是游戏角色&精灵 的录入数据(字典)
+
 ``_record_data.py`` 是语音字幕与角色语音的对应  也是字典
+
 ``_song_data.py``  是歌曲/小贴士的录入数据  字典（因为不会用数据库，所以就用字典凑合凑合=  =）
+
 ``chara.py``  是Hoshinobot原版chara的改编，与歌名猜测功能相关
+
 ``musewiki_achievement.py``  查询成就的主文件
+
 ``musewiki_artwork.py``  查询插画的主文件
+
 ``musewiki_character.py``  查询角色的主文件
+
 ``musewiki_luck.py``  md运势的主文件
+
 ``musewiki_query.py``  资料库主文件
+
 ``musewiki_record.py``  游戏语音的主文件
+
 ``musewiki_song.py`` 是查询歌曲的主文件
+
 ``wiki_log.py``  检查百科文件的主文件
+
+``R.py`` R模块增强版，支持语音调用
 
 </details>
 
@@ -208,6 +214,11 @@ made by [Soung2279@Github](https://github.com/Soung2279/)
 ****
 
 ### 更新日志
+
+#### 2021/8/26  v1.1.0
+
+增加对 R模块 语音调用的支持。[[#HoshinoBot功能性增强-语音调用支持](https://github.com/Soung2279/advance_R)]
+去除发送语音绝对路径的使用。
 
 #### 2021/8/15  v1.0.0
 

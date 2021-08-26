@@ -2474,7 +2474,7 @@ SONG_DATA = {
         "购买曲包",
         "6-8-10-12",
         "12⭐",
-        "freedom",
+        "freedom dive",
         "HOWARD_Y↓",
         "萌新6：取得全连\n高手8：最大连击数达到222以上，“Miss”判定次数不超过22\n大触10+隐藏12：取得三次“A”以上的评价，完美击退所有大型普通敌人，完美击退所有摆锤和突袭敌人"
     ],
@@ -2894,7 +2894,7 @@ SONG_DATA = {
         "Nanahira Festival",
         "5-8-11",
         "11⭐",
-        "Gaming☆Everything",
+        "gaming everything",
         "Howard_Y☆Everything",
         "萌新5：完美击退所有幽灵\n高手8：取得全连，完美击退所有BOSS近身攻击\n大触11：完美躲避所有障碍，完美演奏所有乐谱（长按），完美击退所有摆锤和突袭敌人"
     ],
@@ -3076,7 +3076,7 @@ SONG_DATA = {
         "Let's GROOVE!",
         "6-8-11",
         "11⭐",
-        "marry me, nightmare",
+        "marry me nightmare",
         "Marry me + Howard_Y + Trixxxter",
         "萌新6：取得三次“A”以上的评价\n高手8：取得全连，完美击退所有小型普通敌人\n大触11：“Miss”判定次数不超过10，完美躲避所有障碍，完美演奏所有乐谱（长按）"
     ],
