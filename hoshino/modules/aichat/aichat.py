@@ -35,7 +35,7 @@ sv = Service(
     use_priv = priv.NORMAL, #使用权限   
     manage_priv = priv.ADMIN, #管理权限
     visible = True, #False隐藏
-    enable_on_default = False, #是否默认启用
+    enable_on_default = True, #是否默认启用
     bundle = '娱乐', #属于哪一类
     help_ = sv_help #帮助文本
     )
