@@ -53,8 +53,19 @@ class ResImg(ResObj):
             raise
 
 
+class ResRec(ResObj):
+    @property
+    def cqcode(self) -> MessageSegment:
+        if hoshino.config.RES_PROTOCOL == 'http':
+            return MessageSegment.record(self.url)
+        elif hoshino.config.RES_PROTOCOL == 'file':
+            return MessageSegment.record(f'file:///{os.path.abspath(self.path)}')
+
 def get(path, *paths):
     return ResObj(os.path.join(path, *paths))
 
 def img(path, *paths):
     return ResImg(os.path.join('img', path, *paths))
+
+def rec(path, *paths):
+    return ResRec(os.path.join('record', path, *paths))
