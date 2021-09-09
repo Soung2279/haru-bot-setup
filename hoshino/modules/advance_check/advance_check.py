@@ -1,32 +1,38 @@
-'''
-made by Soung2279@github
-业余写着玩玩，还望大佬海涵（能跑就行.jpg）
-'''
-import wmi  #需要依赖：wmi
-
+# -*- coding: utf-8 -*-
+import wmi
 import socket,time,datetime
 import platform
 import sys
+import time
+from  datetime import datetime
 
-import re
+from PIL import Image
+from os.path import join, getsize
+import win32gui, win32ui, win32con, win32api
+
+import re, os, shutil
 import asyncio
 import hoshino
 
-from hoshino import Service, priv, config, util
+from hoshino import Service, priv, config, util, R
 from hoshino.util import FreqLimiter, DailyNumberLimiter
 from hoshino.typing import CQEvent
 
+#在下面22-26行更改
 forward_msg_exchange = config.FORWARD_MSG_EXCHANGE
 forward_msg_name = config.FORWARD_MSG_NAME
 forward_msg_uid = config.FORWARD_MSG_UID
 recall_msg_set = config.RECALL_MSG_SET
 RECALL_MSG_TIME = config.RECALL_MSG_TIME
+main_path = hoshino.config.RES_DIR  #使用在 _bot_.py 里填入的资源库文件夹
 
 _max = 3  #每天查看配置的次数
 _nlmt = DailyNumberLimiter(_max)
 
 _cd = 3  #每次查看配置的冷却时间(s)
 _flmt = FreqLimiter(_cd)
+
+scwaits = 2 #服务器全屏截图需要等待的时间，若时间过短可能导致图片生成 后于 发送导致发送空图片
 
 WARNING_NOTICE = f"今天已经查看{_max}次了！"  #到达上限的提示语
 
@@ -111,11 +117,65 @@ MEMORY_INFO_ALL = f"{memory_info_1}\n{memory_info_3}"
 DISK_INFO_ALL = f"{disk_info_1}\n{disk_info_2}"
 VIDEO_INFO_ALL = f"{video_info_1}"
 
+# 获取服务器全屏截图
+def window_capture(dpath):
+    hwnd = 0
+    hwndDC = win32gui.GetWindowDC(hwnd)
+    mfcDC=win32ui.CreateDCFromHandle(hwndDC)
+    saveDC=mfcDC.CreateCompatibleDC()
+    saveBitMap = win32ui.CreateBitmap()
+    MoniterDev=win32api.EnumDisplayMonitors(None,None)
+    w = MoniterDev[0][2][2]
+    h = MoniterDev[0][2][3]
+    saveBitMap.CreateCompatibleBitmap(mfcDC, w, h)
+    saveDC.SelectObject(saveBitMap)
+    saveDC.BitBlt((0,0),(w, h) , mfcDC, (0,0), win32con.SRCCOPY)
+    cc=time.gmtime()
+    bmpname=str(cc[0])+str(cc[1])+str(cc[2])+str(cc[3]+8)+str(cc[4])+str(cc[5])+'.bmp'
+    saveBitMap.SaveBitmapFile(saveDC, bmpname)
+    Image.open(bmpname).save(bmpname[:-4]+".jpg")
+    os.remove(bmpname)
+    jpgname=bmpname[:-4]+'.jpg'
+    djpgname=dpath+jpgname
+    copy_command = "move %s %s" % (jpgname, djpgname)
+    os.popen(copy_command)
+    return bmpname[:-4]+'.jpg' #返回的是图片文件名，不带路径
+
+# 获取文件目录大小
+def getdirsize(dir):
+    size = 0
+    for root, dirs, files in os.walk(dir):
+        size += sum([getsize(join(root, name)) for name in files])
+    return size
+
+def countFile(dir):
+    tmp = 0
+    for item in os.listdir(dir):
+        if os.path.isfile(os.path.join(dir, item)):
+            tmp += 1
+        else:
+            tmp += countFile(os.path.join(dir, item))
+    return tmp
+
+# 清理文件目录
+def RemoveDir(filepath):
+    '''
+    如果文件夹不存在就创建，如果文件存在就清空！
+    
+    '''
+    if not os.path.exists(filepath):
+        os.mkdir(filepath)
+    else:
+        shutil.rmtree(filepath)
+        os.mkdir(filepath)
 
 
 sv_help = '''
 简单的查看电脑/服务器各项硬件信息。
+每日定时发送全屏截图
 - [@bot看看配置]  查看
+- [服务器截图]
+- [清理adck]  清空截图
 '''.strip()
 
 sv = Service(
@@ -127,6 +187,54 @@ sv = Service(
     bundle = 'advance', #属于哪一类
     help_ = sv_help #帮助文本
     )
+
+@sv.on_fullmatch(["服务器截图", "bot截图"])
+async def screenshots(bot, ev):
+    uid = ev['user_id']
+    if not priv.check_priv(ev, priv.SUPERUSER):   #建议使用priv.SUPERUSER
+        now = datetime.now()
+        hour = now.hour
+        minute = now.minute
+        hour_str = f' {hour}' if hour<10 else str(hour)
+        minute_str = f' {minute}' if minute<10 else str(minute)
+        sv.logger.warning(f"{ev.user_id}尝试于{hour_str}点{minute_str}分查看服务器全屏截图, 已拒绝")
+        not_allowed_msg = f"权限不足。"  #权限不足时回复的消息
+        await bot.send(ev, not_allowed_msg, at_sender=True)
+        return
+    else:
+        screenshot = window_capture(f"{main_path}img/advance_check/") #截图存放路径
+        await bot.send(ev, f"即将发送服务器全屏截图，请等候...")
+        time.sleep(scwaits)
+        await bot.send(ev, R.img(f'advance_check/{screenshot}').cqcode)
+
+@sv.on_fullmatch(["清理adck", "清除adck"])
+async def deleteshots(bot, ev):
+    path = f"{main_path}img/advance_check/"
+    shots_all_num = countFile(str(main_path+"img/advance_check/"))  #同上
+    shots_all_size = getdirsize(f"{main_path}img/advance_check/")  #同上
+    all_size_num = '%.3f' % (shots_all_size / 1024 / 1024)
+    now = datetime.now()
+    hour = now.hour
+    minute = now.minute
+    hour_str = f' {hour}' if hour<10 else str(hour)
+    minute_str = f' {minute}' if minute<10 else str(minute)
+    if not priv.check_priv(ev, priv.SUPERUSER):   #建议使用priv.SUPERUSER
+        sv.logger.warning(f"{ev.user_id}尝试于{hour_str}点{minute_str}分清除服务器全屏截图, 已拒绝")
+        not_allowed_msg = f"权限不足。"  #权限不足时回复的消息
+        await bot.send(ev, not_allowed_msg, at_sender=True)
+        return
+    else:
+        info_before = f"当前截图有{shots_all_num}张，占用{all_size_num}Mb\n即将进行清理。"
+        await bot.send(ev, info_before)
+
+        RemoveDir(path)  #清理文件目录
+
+        after_size = getdirsize(f"{main_path}img/advance_check/")  #同上
+        after_num = '%.3f' % (after_size / 1024 / 1024)
+        info_after = f"清理完成。当前占用{after_num}Mb"
+        sv.logger.warning(f"超级用户{ev.user_id}于{hour_str}点{minute_str}分清空服务器全屏截图")
+        await bot.send(ev, info_after)
+
 
 @sv.on_fullmatch(["帮助advance_check", "advance_check帮助"])
 async def bangzhu_adck(bot, ev):
@@ -145,9 +253,15 @@ async def advance_check_set(bot, ev: CQEvent):
     _nlmt.increase(uid)
 
     if not priv.check_priv(ev, priv.SUPERUSER):   #建议使用priv.SUPERUSER
-        util.log(f"{ev.user_id}尝试查看服务器配置, 已拒绝")
+        now = datetime.now()
+        hour = now.hour
+        minute = now.minute
+        hour_str = f' {hour}' if hour<10 else str(hour)
+        minute_str = f' {minute}' if minute<10 else str(minute)
+        sv.logger.warning(f"{ev.user_id}尝试于{hour_str}点{minute_str}分查看服务器配置, 已拒绝")
         not_allowed_msg = f"权限不足。"  #权限不足时回复的消息
         await bot.send(ev, not_allowed_msg, at_sender=True)
+        return
     else:
         if forward_msg_exchange == 1:  #简易的判断是否使用合并转发
             data_all = []
@@ -267,8 +381,65 @@ async def advance_check_set(bot, ev: CQEvent):
                 await bot.send(ev, DISK_INFO_ALL)
                 await bot.send(ev, VIDEO_INFO_ALL)
 
+svadpush = Service(
+    name = 'adcheck_push',  #功能名
+    use_priv = priv.NORMAL, #使用权限
+    manage_priv = priv.SUPERUSER, #管理权限
+    visible = True, #是否可见
+    enable_on_default = True, #是否默认启用
+    bundle = 'advance', #属于哪一类
+    help_ = '自检推送服务' #帮助文本
+    )
+
+@svadpush.scheduled_job('cron', hour='9', minute='30')  #每天9:30推送
+async def adcheck_pushs():
+    bot = hoshino.get_bot()
+    receiver = hoshino.config.SUPERUSERS[0]
+    now = datetime.now()
+    hour = now.hour
+    minute = now.minute
+    hour_str = f' {hour}' if hour<10 else str(hour)
+    minute_str = f' {minute}' if minute<10 else str(minute)
+    info_head = f"自检推送:{hour_str}点{minute_str}分"
+    screenshot = window_capture(f"{main_path}img/advance_check/")
+    time.sleep(scwaits)
+    finalimg = R.img(f'advance_check/{screenshot}').cqcode
+    await bot.send_private_msg(user_id=receiver, message=info_head)
+    await bot.send_private_msg(user_id=receiver, message=finalimg)
+
+@svadpush.scheduled_job('cron', hour='14', minute='30')  #每天14:30推送
+async def adcheck_pushs():
+    bot = hoshino.get_bot()
+    receiver = hoshino.config.SUPERUSERS[0]
+    now = datetime.now()
+    hour = now.hour
+    minute = now.minute
+    hour_str = f' {hour}' if hour<10 else str(hour)
+    minute_str = f' {minute}' if minute<10 else str(minute)
+    info_head = f"自检推送:{hour_str}点{minute_str}分"
+    screenshot = window_capture(f"{main_path}img/advance_check/")
+    time.sleep(scwaits)
+    finalimg = R.img(f'advance_check/{screenshot}').cqcode
+    await bot.send_private_msg(user_id=receiver, message=info_head)
+    await bot.send_private_msg(user_id=receiver, message=finalimg)
+
+@svadpush.scheduled_job('cron', hour='20', minute='30')  #每天20:30推送
+async def adcheck_pushs():
+    bot = hoshino.get_bot()
+    receiver = hoshino.config.SUPERUSERS[0]
+    now = datetime.now()
+    hour = now.hour
+    minute = now.minute
+    hour_str = f' {hour}' if hour<10 else str(hour)
+    minute_str = f' {minute}' if minute<10 else str(minute)
+    info_head = f"自检推送:{hour_str}点{minute_str}分"
+    screenshot = window_capture(f"{main_path}img/advance_check/")
+    time.sleep(scwaits)
+    finalimg = R.img(f'advance_check/{screenshot}').cqcode
+    await bot.send_private_msg(user_id=receiver, message=info_head)
+    await bot.send_private_msg(user_id=receiver, message=finalimg)
+
 '''
 原项目地址：
 作者主页：https://github.com/Soung2279
 '''
-
