@@ -4,14 +4,22 @@ Haru-Bot-Setup
 
 #### 更新日志
 
+##### 2021/9/10  v1.5.5
+
+更新插件，修复依赖文件不完整的问题(使用了pipreqs导出项目依赖)
+
+更新README, 删除了错误的描述
+
 ##### 2021/8/27  v1.5
 
 新增&更新多个插件并做Haru适配（魔改），增加hoshino原生语音调用支持
+
 目前遗留问题：requirements.txt不完整，部分依赖缺失
 
 ##### 2021/8/15  v1.0
 
 更新musedashwiki
+
 计划更新：全局自定义回复语，更生动 ~~moe~~ 的语言库
 
 ****
@@ -31,11 +39,14 @@ HoshinoBot-Harubot是基于[Go-cqhttp](https://github.com/Mrs4s/go-cqhttp)，[Ho
 - [x] 风格统一，完善的指令说明
 - [x] 统一文件配置参数
 - [ ] 自定义适配的功能模块（逐步魔改中）
+- [ ] 汇总统一自定义bot菜单提示信息
 - [ ] ……
 
 **感谢[Go-cqhttp](https://github.com/Mrs4s/go-cqhttp)项目 ，[HoshinoBot](https://github.com/Ice-Cirno/HoshinoBot)项目和 众多[bot插件](https://github.com/pcrbot) 的开发者们！**
 
 **本README具有时效性，请注意。**
+
+**本项目正处于频繁快速的更新迭代中，README可能更新不及时**
 
 ****
 #### Author:Soung2279
@@ -257,18 +268,21 @@ pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
 
 `hoshino/config/_bot_.py`
 ```python
-PORT = 8090  # 设置为8090
+PORT = 8090  # 建议设置为8090
 HOST = '127.0.0.1'      # 本地部署使用此条配置
 
 SUPERUSERS = [2279134404]    # 填写超级用户（你）的QQ号，
-NICKNAME = r'小晴|野中晴|haru|at,qq=756160433'  #  设置机器人的呢称
+NICKNAME = ('小晴','野中晴','haru','@756160433')  #  设置机器人的呢称，呼叫昵称等同于@bot，请使用 ``元组 tuple`` 进行配置
 
-# 资源库文件夹，需可读可写，windows下注意反斜杠转义
+# 资源库文件夹，需可读可写，windows下注意反斜杠转义，注意最后一根斜杠
 RES_DIR = r'C:/Resources/'
 
-lolicon_api = ''  # 填写api
+lolicon_api = ''  # 填写api（因Lolicon更新，无需使用apikey，可不填）
 acggov_api = ''  # 填写api
-shitu_api = ''  # 填写api
+saucenao_api = ''  # 填写api
+aichat_ID = ''  # 填写api
+aichat_KEY = ''  # 填写api
+
 
 FORWARD_MSG_EXCHANGE = 1  #全局消息转发。1为启用，0为禁用
 FORWARD_MSG_NAME = 'bot主人：2279134404'  #转发消息显示的呢称
@@ -277,17 +291,16 @@ FORWARD_MSG_UID = 756160433  #转发消息使用的qq画像（头像）
 RECALL_MSG_SET = 1  #全局定时撤回，1为启用，0为禁用，推荐启用规避风控
 RECALL_MSG_TIME = 30  #撤回等待时长(单位s)
 
-# 下面这些写不写都无所谓
-VERSION = '1.0.0'
-GO_VERSION = 'go-cqhttp_1.0.0-beta4_windows_amd64'
-PYTHON_VERSION = 'Python 3.8.5 64-bit'
-LAST_UPDATE = '2021/7/14'
 ```
 
 关于API，可参考：
 
 [ACG-GOV](https://acg-gov.com/)
+
 [Lolicon](https://lolicon.app/)
+
+[腾讯AI开放平台](https://ai.qq.com)
+
 [SauceNAO识别图片](https://saucenao.com/index.php)的API[申请](https://saucenao.com/user.php)
 
 #### 设置端口与通信方式
@@ -342,10 +355,12 @@ Running on http://127.0.0.1:8090 (CTRL + C to quit)
 [2021-07-14 04:51:32] [INFO]: 开始尝试连接到反向WebSocket Universal服务器: ws://127.0.0.1:8090/ws/
 [2021-07-14 04:51:33] [INFO]: 检查更新完成. 当前已运行最新版本.
 ```
+
 若该过程中hoshinobot窗口闪退，则请点击文件夹左上角的 `文件 -> 打开Windows Powershell`，输入以下命令
 ```python
 py run.py
 ```
+
 查看**红色报错信息。**（大多数时候是某依赖未安装。请复制粘贴报错信息到百度）
 
 #### 完成
@@ -567,13 +582,21 @@ harubot的孪生bot：
 #### 插件部分
 
 - [Dihe Chen](https://github.com/Chendihe4975)  
+- 
 - [var](https://github.com/var-mixer)  
+- 
 - [xhl6699](https://github.com/xhl6666)  
+- 
 - [Watanabe-Asa](https://github.com/Watanabe-Asa)  
+- 
 - [-LAN-](https://github.com/laipz8200)  
+- 
 - [Cappuccilo](https://github.com/Cappuccilo)  
+- 
 - [yuyumoko](https://github.com/yuyumoko)  
+- 
 - [H-K-Y](https://github.com/H-K-Y)  
+- 
 - [ZhouYuan](https://github.com/zyujs)  
 ...
 
