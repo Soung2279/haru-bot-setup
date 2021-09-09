@@ -102,7 +102,7 @@ HoshinoBot-Harubot是基于[Go-cqhttp](https://github.com/Mrs4s/go-cqhttp)，[Ho
 2. 在合适的文件目录`新建文件夹`并双击打开，点击文件夹左上角的 `文件 -> 打开Windows Powershell`，输入以下命令
 
     ```powershell
-    git clone https://github.com/Soung2279/Haru-Bot-Setup.git
+    git clone https://github.com/Soung2279/haru-bot-setup.git
     ```
 
     或者直接下载本分支文件[Haru-Bot-Setup-master.zip](https://github.com/Soung2279/haru-bot-setup/archive/refs/heads/master.zip)
