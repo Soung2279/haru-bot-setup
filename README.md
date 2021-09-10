@@ -10,6 +10,8 @@ Haru-Bot-Setup
 
 更新README, 删除了错误的描述
 
+更新资源包
+
 ##### 2021/8/27  v1.5
 
 新增&更新多个插件并做Haru适配（魔改），增加hoshino原生语音调用支持
@@ -119,27 +121,24 @@ HoshinoBot-Harubot是基于[Go-cqhttp](https://github.com/Mrs4s/go-cqhttp)，[Ho
     或者直接下载本分支文件[Haru-Bot-Setup-master.zip](https://github.com/Soung2279/haru-bot-setup/archive/refs/heads/master.zip)
 
 
-3. 在合适的文件目录（推荐C盘根目录）新建文件夹并重命名为`Resources`  
+3. 在合适的文件目录新建文件夹，建议重命名为`Resources` 
     将收集到的 图片/语音资源 放入该文件夹，注意文件目录结构
     ```
-    应当具有以下路径
-    C:\Resources
-    C:\Resources\img        总的图片存放位置
-    C:\Resources\explorion-voice   爆裂魔法语音
-    C:\Resources\record   xcw骂我要用
+    应当具有以下路径（Windows环境下）
+    X:\Resources
+    X:\Resources\img        总的图片资源
+    X:\Resources\explorion   爆裂魔法语音（历史遗留问题单独存放）
+    X:\Resources\record   总的语音文件
     ......
     ```
-    **推荐**使用本人已经打包好的资源包。因为有很多遗留的老路径没有改=  =
-    > 百度网盘：**[haru_bot_res.zip](https://pan.baidu.com/s/11pG8FACz7EBRlNRQ78E84A)**
-    > 提取码：***2279***  
-    > 这里面的东西有大部分都是多余的，只是不知道设置的老路径有哪些，最好还是不要动（能跑就行.JPG）
+    **推荐**使用本人已经打包好的资源包。
     
-    如果使用资源包，请解压到C盘根目录并修改文件夹名
-
-    ```
-    应当具有以下路径
-    C:\Resources
-    ```
+    > 百度网盘：**[harubot资源2021-9-10.zip](https://pan.baidu.com/s/1JEJcbA4igbeqJzWnpUxuPQ)**
+    > 提取码：***2279*** 
+    > 约3个G，包含了当前Harubot运行所需的所有资源文件。
+    > 已含本人自用setu库
+    
+    （Windows环境下）如果使用资源包，建议解压到 `C://Resources` 
 
  ---   
 ### 功能介绍
