@@ -10,7 +10,7 @@ HOST = '127.0.0.1'      # 本地部署使用此条配置（QQ客户端和bot端�
 DEBUG = False           # 调试模式
 
 WHITE_LIST = []      #白名单用户
-SUPERUSERS = [2279134404]    # 填写超级用户的QQ号，可填多个用半角逗号","隔开
+SUPERUSERS = [11223344,123123123]    # 填写超级用户的QQ号，可填多个用半角逗号","隔开
 NICKNAME = ('小晴','野中晴','haru','@756160433')          # 机器人的昵称。呼叫昵称等同于@bot，可用元组配置多个昵称
 
 #不需要改动
@@ -26,17 +26,17 @@ RES_URL = 'http://127.0.0.1:5000/static/'
 
 # 需要用到的API
 # - 涩图相关
-lolicon_api = 'xxx'
-acggov_api = 'xxx'
+lolicon_api = '1112'
+acggov_api = '1112'
 
 # - 搜图相关
-saucenao_api = 'xxx'
-pixiv_id = 'xxx'
-pixiv_password = 'xxx'
+saucenao_api = '1112'
+pixiv_id = '1112'
+pixiv_password = '1112'
 
-#【Error】因API失效，已弃用
-aichat_api_ID = 'xxx'
-aichat_api_KEY = 'xxx'
+# - 腾讯云相关
+aichat_ID = '1112'
+aichat_KEY = '1112'
 
 
 # 启用的模块
@@ -51,9 +51,9 @@ MODULES_ON = {
     'asill', #A-SOUL发病小作文
     'bandori', #邦邦车站
     'bh3_calendar', #崩坏3日历
-    #'bilidynamicpush', #B站动态
-    #'bilisearchspider', #B站爬虫
-    #'botchat', #语言库
+    'bilidynamicpush', #B站动态
+    'bilisearchspider', #B站爬虫
+    'botchat', #语言库
     'botmanage', #bot功能性管理
     'cp', #土味情话
     'check', #服务器自检
@@ -65,7 +65,6 @@ MODULES_ON = {
     #'epixiv', #pixiv搜图
     'eqa', #问答
     'explosion', #爆裂魔法
-    'falali', #-------------------
     'fishf14', #ff14钓鱼
     'flac', #无损音乐
     'functions', #小功能合集
@@ -101,7 +100,6 @@ MODULES_ON = {
     'portune', #pcr运势
     'priconne', #pcr小游戏相关
     'pulipuli', #反bilibili小程序
-    #'r6_anti_hacker', #---------------------
     'revgif', #倒放gif
     'setu', #本地涩图
     'setu_renew', #在线涩图
@@ -114,9 +112,12 @@ MODULES_ON = {
     'voiceguess', #猜语音
     'weather', #天气查询
     'whattoeat', #今天吃什么
-    #'wordcloud', #词云
+    'wordcloud', #词云
     'zhihu', #知乎日报
     #'test',
+    'advance_tarot',  #群聊塔罗牌
+    'lifeRestart',  #人生重来模拟器
+    'nana7mi',  #可爱小七海语音
 }
 
 
@@ -154,4 +155,4 @@ RECALL_MSG_SET = 1  #1为启用，0为禁用，推荐启用规避风控
 RECALL_MSG_TIME = 30  #撤回等待时长(单位s)
 
 # 自检信息相关
-VERSION = 'SoungBot_free_edition_beta_1.0.5'
+VERSION = 'v1.0.0'
