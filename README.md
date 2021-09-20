@@ -4,6 +4,10 @@ Haru-Bot-Setup
 
 #### 更新日志
 
+##### 2021/9/21  v1.5.8
+
+新增：[百度一下](https://github.com/Soung2279/baidu_search)，[vtuber查询功能](https://github.com/Soung2279/vdb_list)
+
 ##### 2021/9/17  v1.5.7
 
 新增七海娜娜米语音
