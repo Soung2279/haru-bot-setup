@@ -37,7 +37,6 @@ PyYAML==5.4.1
 websocket_client==1.2.1
 openpyxl
 xlrd
-posix
 httpx~=0.12.1
 uuid~=1.30
 wordcloud
