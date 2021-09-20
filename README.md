@@ -593,21 +593,21 @@ harubot的孪生bot：
 #### 插件部分
 
 - [Dihe Chen](https://github.com/Chendihe4975)  
-- 
+
 - [var](https://github.com/var-mixer)  
-- 
+
 - [xhl6699](https://github.com/xhl6666)  
-- 
+
 - [Watanabe-Asa](https://github.com/Watanabe-Asa)  
-- 
+
 - [-LAN-](https://github.com/laipz8200)  
-- 
+
 - [Cappuccilo](https://github.com/Cappuccilo)  
-- 
+
 - [yuyumoko](https://github.com/yuyumoko)  
-- 
+
 - [H-K-Y](https://github.com/H-K-Y)  
-- 
+
 - [ZhouYuan](https://github.com/zyujs)  
 ...
 
