@@ -118,6 +118,8 @@ MODULES_ON = {
     'advance_tarot',  #群聊塔罗牌
     'lifeRestart',  #人生重来模拟器
     'nana7mi',  #可爱小七海语音
+    'baidu', #百度一下
+    'vdb', #vtuber查询
 }
 
 
