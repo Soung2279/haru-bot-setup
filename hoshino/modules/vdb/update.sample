@@ -1,0 +1,64 @@
+import json
+import urllib.request
+ 
+def getHtml(url):
+    html = urllib.request.urlopen(url).read()
+    return html
+ 
+def saveJson(file_name, file_content):
+    #    注意windows文件命名的禁用符，比如 /
+    with open(file_name.replace('/', '_') + ".json", "wb") as f:
+        #   写文件用bytes而不是str，所以要转码
+        f.write(file_content)
+ 
+aurl = "https://vdb.vtbs.moe/json/list.json"
+html = getHtml(aurl)
+print(f'\n即将从{aurl}进行下载...')
+saveJson("list", html)
+print('\n下载成功。即将执行文件重写...\n')
+
+f = open('./list.json', 'r', encoding='utf-8')
+content = f.read()
+vdb_dict = json.loads(content)
+vtbs = vdb_dict["vtbs"]
+nums = len(vtbs)
+print(f'\n当前list.json已收录{nums}位vtuber。\n')
+saves = []
+with open('./vdb.json', 'w', encoding='utf-8') as f:
+    for x in range(1, nums):
+        new_type = vdb_dict["vtbs"][x]["type"]
+        new_bot = vdb_dict["vtbs"][x]["bot"]
+        b = vdb_dict["vtbs"][x]["accounts"]
+        for acdict in b:
+            for i, k in acdict.items():
+                if i == "id":
+                    account_id = k
+                if i == "type":
+                    account_type = k
+                if i == "platform":
+                    account_platform = k
+
+        name_default = vdb_dict["vtbs"][x]["name"]["default"]
+        lang = str(name_default)
+        name = vdb_dict["vtbs"][x]["name"][lang]
+        name_extra = vdb_dict["vtbs"][x]["name"]["extra"]
+
+        vdbdata = {
+            f"(x)":[
+                f'{name}',   #中文名
+                f'{name_extra}',    #别名
+                f'{name_default}',  #默认语言
+                f'{new_type}',  #出道类型
+                f'{new_bot}',   #是否bot
+                f'{account_id}',   #账号id
+                f'{account_type}', #账号运营类型
+                f'{account_platform}', #账号平台
+                ]
+            }
+        saves.append(vdbdata)
+        json.dump(vdbdata, f, ensure_ascii=False, indent=4)
+
+if __name__ == "__main__":
+    print('\nJSON文件重写完成。请查看vdb.json\n')
+    print('\n执行完成后，请手动将 vdb.json 内的所有 “}{” 替换为 “,” \n可使用notepad++打开，ctrl+f 打开替换界面\n')
+    print('\n请注意是 “}{” ，而非所有的“{}”\n')
