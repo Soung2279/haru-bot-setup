@@ -4,6 +4,8 @@ Haru-Bot-Setup
 
 #### 更新日志
 
+### 2022/5/15  v future  因本人学业繁忙，暂时宣布跑路，更新与维护无限期延迟。
+
 ##### 2021/9/21  v1.5.8
 
 新增：[百度一下](https://github.com/Soung2279/baidu_search)，[vtuber查询功能](https://github.com/Soung2279/vdb_list)
